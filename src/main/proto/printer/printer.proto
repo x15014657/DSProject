@@ -8,15 +8,33 @@ option java_multiple_files = true;
 message Printer {
     bool status = 1;
 }
+message CheckPrinter{
+    bool status = 1;
+}
+
+//The Request and Responses - what we send and what we receive
+//from between the client and server
 message PrinterRequest {
     Printer status = 1;
 }
 message PrinterResponse {
     string result = 1;
 }
+message CheckPrinterRequest {
+    CheckPrinter status = 1;
+}
+message CheckPrinterResponse {
+    string network = 1;
+    string cartridge = 2;
+    string ink = 3;
+    string result = 4;
+}
+
 
 //define and name service - make readable
 service PrintService{
     //Unary
     rpc PrinterStatus(PrinterRequest) returns (PrinterResponse) {};
+    //Server Streaming
+    rpc CheckPrinter(CheckPrinterRequest)returns (stream CheckPrinterResponse) {};
 }

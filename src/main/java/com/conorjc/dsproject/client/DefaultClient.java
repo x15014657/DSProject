@@ -1,11 +1,8 @@
 package com.conorjc.dsproject.client;
 
-import com.conorjc.dsproject.gui.ControllerGUI;
 import com.proto.greet.*;
-import com.proto.printer.PrintServiceGrpc;
-import com.proto.printer.Printer;
-import com.proto.printer.PrinterRequest;
-import com.proto.printer.PrinterResponse;
+import com.proto.greet.GreetServiceGrpc;
+import com.proto.printer.*;
 import com.proto.thermo.Thermo;
 import com.proto.thermo.ThermoRequest;
 import com.proto.thermo.ThermoResponse;
@@ -16,6 +13,7 @@ import com.proto.vpn.VpnResponse;
 import com.proto.vpn.VpnServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+
 
 
 public class DefaultClient {
@@ -62,7 +60,7 @@ public class DefaultClient {
                .build();
 
         Printer printStatus = Printer.newBuilder()
-                .setStatus(true)
+                .setStatus(false)
                 .build();
 
         Vpn vpnStatus = Vpn.newBuilder()
@@ -80,9 +78,16 @@ public class DefaultClient {
                .setGreeting(greeting)
                .build();
 
+       //Unary Request
         PrinterRequest printerRequest = PrinterRequest.newBuilder()
                 .setStatus(printStatus)
                 .build();
+
+        //Server Streaming Side
+        CheckPrinterRequest checkPrinterRequest =
+                CheckPrinterRequest.newBuilder()
+                        .setStatus(CheckPrinter.newBuilder().setStatus(true))
+                        .build();
 
         VpnRequest vpnRequest = VpnRequest.newBuilder()
             .setStatus(vpnStatus)
@@ -96,9 +101,22 @@ public class DefaultClient {
 //-------------------------------------------------------------------------------------//
         System.out.println("Smart HomeOffice Active...");
         //call the RPC and get back a Response (protocol buffers)
+
+
         GreetResponse greetResponse = greetClient.greet(greetRequest);
+        //Unary
         PrinterResponse printResponse = printClient.printerStatus(printerRequest);
+        //Server Streaming
+        printClient.checkPrinter(checkPrinterRequest)
+                .forEachRemaining(checkPrinterResponse -> {
+                    System.out.println(checkPrinterResponse.getNetwork());
+                    System.out.println(checkPrinterResponse.getCartridge());
+                    System.out.println(checkPrinterResponse.getInk());
+                    System.out.println(checkPrinterResponse.getResult());
+                });
+
         VpnResponse vpnResponse = vpnClient.vpnStatus(vpnRequest);
+
         ThermoResponse thermoResponse = thermoClient.thermoStatus(thermoRequest);
 
         //Print the response from the server
@@ -109,12 +127,11 @@ public class DefaultClient {
 
         //Shut our channels down
         //System.out.println("Shutting down channels...");
-       // channel.shutdown();
-       // channel1.shutdown();
-       // channel2.shutdown();
-       // channel3.shutdown();
+        // channel.shutdown();
+        // channel1.shutdown();
+        // channel2.shutdown();
+        // channel3.shutdown();
+        // }
+
     }
-
-
-    }
-
+}

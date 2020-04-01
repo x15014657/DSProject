@@ -15,7 +15,6 @@ public class DefaultServer {
                 .addService(new GreetServiceImpl())
                 .build();
 
-
         io.grpc.Server server1 = ServerBuilder.forPort(50052)
                 .addService(new PrinterServiceImpl())
                 .build();
