@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package printer;
+
+option java_package = "com.proto.printer";
+option java_multiple_files = true;
+
+message Printer {
+    bool status = 1;
+}
+message PrinterRequest {
+    Printer status = 1;
+}
+message PrinterResponse {
+    string result = 1;
+}
+
+//define and name service - make readable
+service PrintService{
+    //Unary
+    rpc PrinterStatus(PrinterRequest) returns (PrinterResponse) {};
+}

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package thermo;
+
+option java_package = "com.proto.thermo";
+option java_multiple_files = true;
+
+message Thermo {
+  bool status = 1;
+}
+message ThermoRequest {
+  Thermo status = 1;
+}
+message ThermoResponse {
+  string result = 1;
+}
+
+//define and name service - make readable
+service ThermoService{
+  //Unary
+  rpc ThermoStatus(ThermoRequest) returns (ThermoResponse) {};
+}

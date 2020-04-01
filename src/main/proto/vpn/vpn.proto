@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package vpn;
+
+option java_package = "com.proto.vpn";
+option java_multiple_files = true;
+
+message Vpn {
+    bool status = 1;
+}
+message VpnRequest {
+    Vpn status = 1;
+}
+message VpnResponse {
+    string result = 1;
+}
+
+//define and name service - make readable
+service VpnService{
+    rpc VpnStatus(VpnRequest) returns (VpnResponse) {};
+}
