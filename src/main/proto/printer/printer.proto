@@ -1,27 +1,29 @@
 syntax = "proto3";
-
 package printer;
-
 option java_package = "com.proto.printer";
 option java_multiple_files = true;
 
+
 message Printer {
     bool status = 1;
+    string testPage = 2;
+    string testData = 3;
+    string completed = 4;
 }
-message CheckPrinter{
-    bool status = 1;
-}
-
 //The Request and Responses - what we send and what we receive
 //from between the client and server
+/* --------------------------------------------------------- */
+
 message PrinterRequest {
     Printer status = 1;
 }
 message PrinterResponse {
     string result = 1;
 }
+/* --------------------------------------------------------- */
+
 message CheckPrinterRequest {
-    CheckPrinter status = 1;
+    Printer status = 1;
 }
 message CheckPrinterResponse {
     string network = 1;
@@ -29,7 +31,17 @@ message CheckPrinterResponse {
     string ink = 3;
     string result = 4;
 }
+/* --------------------------------------------------------- */
 
+message PrintTestResponse{
+    string result = 1;
+}
+message PrintTestRequest{
+    string testPage = 1;
+    string testData = 2;
+    string completed = 3;
+}
+/* --------------------------------------------------------- */
 
 //define and name service - make readable
 service PrintService{
@@ -37,4 +49,6 @@ service PrintService{
     rpc PrinterStatus(PrinterRequest) returns (PrinterResponse) {};
     //Server Streaming
     rpc CheckPrinter(CheckPrinterRequest)returns (stream CheckPrinterResponse) {};
+    //Client Streaming
+    rpc PrintTest(stream PrintTestRequest) returns (PrintTestResponse) {};
 }

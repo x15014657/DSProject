@@ -26,19 +26,19 @@ public class Client {
         System.out.println("Client Interface Initialising...");
 
         System.out.println("Building Channels...");
-        ManagedChannel  channel = ManagedChannelBuilder.forAddress("localhost", 50051)
+        ManagedChannel  channel = ManagedChannelBuilder.forAddress("localhost", 50050)
                 .usePlaintext()
                 .build();
 
-        ManagedChannel  channel1 = ManagedChannelBuilder.forAddress("localhost", 50052)
+        ManagedChannel  channel1 = ManagedChannelBuilder.forAddress("localhost", 50051)
                 .usePlaintext()
                 .build();
 
-        ManagedChannel  channel2 = ManagedChannelBuilder.forAddress("localhost", 50053)
+        ManagedChannel  channel2 = ManagedChannelBuilder.forAddress("localhost", 50052)
                 .usePlaintext()
                 .build();
 
-        ManagedChannel  channel3 = ManagedChannelBuilder.forAddress("localhost", 50054)
+        ManagedChannel  channel3 = ManagedChannelBuilder.forAddress("localhost", 50053)
                 .usePlaintext()
                 .build();
 
@@ -86,7 +86,7 @@ public class Client {
         //Server Streaming Side
         CheckPrinterRequest checkPrinterRequest =
                 CheckPrinterRequest.newBuilder()
-                        .setStatus(CheckPrinter.newBuilder().setStatus(true))
+                        .setStatus(Printer.newBuilder().setStatus(true))
                         .build();
 
         VpnRequest vpnRequest = VpnRequest.newBuilder()

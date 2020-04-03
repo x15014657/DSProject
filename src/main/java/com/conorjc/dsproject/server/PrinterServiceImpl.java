@@ -34,7 +34,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
     @Override
     public void checkPrinter(CheckPrinterRequest request, StreamObserver<CheckPrinterResponse> responseObserver) {
-        CheckPrinter checkPrinter = request.getStatus();
+        Printer checkPrinter = request.getStatus();
         boolean status = checkPrinter.getStatus();
 
         //create the action before the response
@@ -65,5 +65,10 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
                 .setResult(result)
                 .build();
         responseObserver.onNext(response);
+    }
+
+    @Override
+    public StreamObserver<PrintTestRequest> printTest(StreamObserver<PrintTestResponse> responseObserver) {
+        return super.printTest(responseObserver);
     }
 }
