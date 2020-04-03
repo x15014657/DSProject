@@ -11,7 +11,7 @@ public class VpnServiceImpl extends VpnServiceGrpc.VpnServiceImplBase {
         @Override
         public void vpnStatus(VpnRequest request, StreamObserver<VpnResponse> responseObserver) {
                 Vpn vpnStatus = request.getStatus();
-                Boolean status = vpnStatus.getStatus();
+                boolean status = vpnStatus.getStatus();
 
         //create the  response
         String result;

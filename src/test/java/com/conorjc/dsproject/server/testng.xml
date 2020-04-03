@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="All Test Suite">
+    <test verbose="2" preserve-order="true"
+          name="C:/Users/Distributed Systems/Desktop/DSProject/src/test/java/com/conorjc/dsproject/server">
+        <classes>
+            <class name="com.conorjc.dsproject.server.PrinterServiceTest">
+                <methods>
+                    <include name="testPrinterStatus"/>
+                    <include name="testCheckPrinter"/>
+                </methods>
+            </class>
+            <class name="com.conorjc.dsproject.server.ServerTest">
+                <methods>
+                    <include name="testServer"/>
+                </methods>
+            </class>
+            <class name="com.conorjc.dsproject.server.ThermoServiceImplTest">
+                <methods>
+                    <include name="testThermoStatus"/>
+                </methods>
+            </class>
+            <class name="com.conorjc.dsproject.server.VpnServiceImplTest">
+                <methods>
+                    <include name="testVpnStatus"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>

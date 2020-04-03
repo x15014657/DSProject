@@ -16,7 +16,7 @@ import io.grpc.ManagedChannelBuilder;
 
 
 
-public class DefaultClient {
+public class Client {
 
 
 
@@ -55,9 +55,9 @@ public class DefaultClient {
         System.out.println("Building Protocol Buffer Messages...");
         //created a protocol buffer greeting message
         Greeting greeting = Greeting.newBuilder()
-          .setFirstName("Conor")
-               .setLastName("Clarke")
-               .build();
+                .setFirstName("Conor")
+                .setLastName("Clarke")
+                .build();
 
         Printer printStatus = Printer.newBuilder()
                 .setStatus(false)
@@ -74,11 +74,11 @@ public class DefaultClient {
 //-------------------------------------------------------------------------------------//
         System.out.println("Building Protocol Buffer Requests...");
         //do the same for a GreetRequest
-       GreetRequest greetRequest = GreetRequest.newBuilder()
-               .setGreeting(greeting)
-               .build();
+        GreetRequest greetRequest = GreetRequest.newBuilder()
+                .setGreeting(greeting)
+                .build();
 
-       //Unary Request
+        //Unary Request
         PrinterRequest printerRequest = PrinterRequest.newBuilder()
                 .setStatus(printStatus)
                 .build();
@@ -90,7 +90,7 @@ public class DefaultClient {
                         .build();
 
         VpnRequest vpnRequest = VpnRequest.newBuilder()
-            .setStatus(vpnStatus)
+                .setStatus(vpnStatus)
                 .build();
 
         ThermoRequest thermoRequest = ThermoRequest.newBuilder()

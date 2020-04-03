@@ -1,12 +1,10 @@
 package com.conorjc.dsproject.server;
 
-
 import com.proto.printer.*;
 import io.grpc.stub.StreamObserver;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
-    @Override
     public void printerStatus(PrinterRequest request, StreamObserver<PrinterResponse> responseObserver) {
         Printer printStatus = request.getStatus();
         boolean status = printStatus.getStatus();

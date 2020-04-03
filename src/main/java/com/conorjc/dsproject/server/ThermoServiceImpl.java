@@ -1,10 +1,8 @@
 package com.conorjc.dsproject.server;
 
 
-import com.proto.thermo.Thermo;
-import com.proto.thermo.ThermoRequest;
-import com.proto.thermo.ThermoResponse;
-import com.proto.thermo.ThermoServiceGrpc;
+import com.proto.thermo.*;
+
 import io.grpc.stub.StreamObserver;
 
 public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
@@ -12,7 +10,7 @@ public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
     @Override
     public void thermoStatus(ThermoRequest request, StreamObserver<ThermoResponse> responseObserver) {
         Thermo thermoStatus = request.getStatus();
-        Boolean status = thermoStatus.getStatus();
+        boolean status = thermoStatus.getStatus();
 
         //create the  response
         String result;
