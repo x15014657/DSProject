@@ -5,7 +5,7 @@ import io.grpc.stub.StreamObserver;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
-    public void printerStatus(PrinterRequest request, StreamObserver<PrinterResponse> responseObserver) {
+    public void printerStatus(PrinterStatusRequest request, StreamObserver<PrinterStatusResponse> responseObserver) {
         Printer printStatus = request.getStatus();
         boolean status = printStatus.getStatus();
 
@@ -18,7 +18,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
             result = "The Printer is Online";
         }
 
-        PrinterResponse response = PrinterResponse.newBuilder()
+        PrinterStatusResponse response = PrinterStatusResponse.newBuilder()
                 .setResult(result)
                 .build();
 
@@ -54,7 +54,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
                     responseObserver.onNext(response);
                     Thread.sleep(3000L);
-                     }
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 System.out.println("System is offline");
@@ -68,7 +68,33 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
     }
 
     @Override
-    public StreamObserver<PrintTestRequest> printTest(StreamObserver<PrintTestResponse> responseObserver) {
-        return super.printTest(responseObserver);
+    public StreamObserver<LongPrintTestRequest> longPrintTest(StreamObserver<LongPrintTestResponse> responseObserver) {
+
+        return new StreamObserver<LongPrintTestRequest>() {
+
+            String result = "";
+
+            @Override
+            public void onNext(LongPrintTestRequest value) {
+                //client sends a message
+                result += "" + value.getTp().getTestpage();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                //client sends an error
+            }
+
+            @Override
+            public void onCompleted() {
+                //client is done
+                responseObserver.onNext(
+                        LongPrintTestResponse.newBuilder()
+                                .setResult(result)
+                                .build()
+                );
+                responseObserver.onCompleted();
+            }
+        };
     }
 }

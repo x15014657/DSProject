@@ -2,7 +2,6 @@ package com.conorjc.dsproject.server;
 
 
 import com.proto.thermo.*;
-
 import io.grpc.stub.StreamObserver;
 
 public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {

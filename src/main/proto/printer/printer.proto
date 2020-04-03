@@ -6,18 +6,17 @@ option java_multiple_files = true;
 
 message Printer {
     bool status = 1;
-    string testPage = 2;
-    string testData = 3;
-    string completed = 4;
+    string testpage = 2;
+
 }
 //The Request and Responses - what we send and what we receive
 //from between the client and server
 /* --------------------------------------------------------- */
 
-message PrinterRequest {
+message PrinterStatusRequest {
     Printer status = 1;
 }
-message PrinterResponse {
+message PrinterStatusResponse {
     string result = 1;
 }
 /* --------------------------------------------------------- */
@@ -32,23 +31,22 @@ message CheckPrinterResponse {
     string result = 4;
 }
 /* --------------------------------------------------------- */
+message LongPrintTestRequest{
+    Printer tp = 1;
+}
 
-message PrintTestResponse{
+message LongPrintTestResponse{
     string result = 1;
 }
-message PrintTestRequest{
-    string testPage = 1;
-    string testData = 2;
-    string completed = 3;
-}
+
 /* --------------------------------------------------------- */
 
 //define and name service - make readable
 service PrintService{
     //Unary
-    rpc PrinterStatus(PrinterRequest) returns (PrinterResponse) {};
+    rpc PrinterStatus(PrinterStatusRequest) returns (PrinterStatusResponse) {};
     //Server Streaming
     rpc CheckPrinter(CheckPrinterRequest)returns (stream CheckPrinterResponse) {};
     //Client Streaming
-    rpc PrintTest(stream PrintTestRequest) returns (PrintTestResponse) {};
+    rpc LongPrintTest(stream LongPrintTestRequest) returns (LongPrintTestResponse) {};
 }

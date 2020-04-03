@@ -1,113 +1,123 @@
 package com.conorjc.dsproject.client;
 
-import com.proto.greet.*;
-import com.proto.greet.GreetServiceGrpc;
 import com.proto.printer.*;
 import com.proto.thermo.Thermo;
 import com.proto.thermo.ThermoRequest;
 import com.proto.thermo.ThermoResponse;
 import com.proto.thermo.ThermoServiceGrpc;
-import com.proto.vpn.Vpn;
-import com.proto.vpn.VpnRequest;
-import com.proto.vpn.VpnResponse;
-import com.proto.vpn.VpnServiceGrpc;
+import com.proto.vpn.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-
+import io.grpc.stub.StreamObserver;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 
 public class Client {
 
 
-
     public static void main(String[] args) {
 
+        Client main = new Client();
+        main.run();
+    }
+    private void run()  {
 
         System.out.println("Client Interface Initialising...");
 
         System.out.println("Building Channels...");
-        ManagedChannel  channel = ManagedChannelBuilder.forAddress("localhost", 50050)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50050)
                 .usePlaintext()
                 .build();
 
-        ManagedChannel  channel1 = ManagedChannelBuilder.forAddress("localhost", 50051)
+        ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 50051)
                 .usePlaintext()
                 .build();
 
-        ManagedChannel  channel2 = ManagedChannelBuilder.forAddress("localhost", 50052)
-                .usePlaintext()
-                .build();
-
-        ManagedChannel  channel3 = ManagedChannelBuilder.forAddress("localhost", 50053)
+        ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 50052)
                 .usePlaintext()
                 .build();
 
 
-//-------------------------------------------------------------------------------------//
-        System.out.println("Creating stubs...");
-        GreetServiceGrpc.GreetServiceBlockingStub greetClient = GreetServiceGrpc.newBlockingStub(channel);
-        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel1);
-        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel2);
-        ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel3);
 
+      //  doUnaryCall(channel, channel1, channel2);
+      //  doServerStreamingCall(channel);
+        doClientStreamingCall(channel);
 
-//-------------------------------------------------------------------------------------//
-        System.out.println("Building Protocol Buffer Messages...");
-        //created a protocol buffer greeting message
-        Greeting greeting = Greeting.newBuilder()
-                .setFirstName("Conor")
-                .setLastName("Clarke")
+       /* System.out.println("Shutting Down Channels");
+        channel.shutdown();
+        channel1.shutdown();
+        channel2.shutdown();
+        channel3.shutdown();*/
+
+    }
+    private void doUnaryCall(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2) {
+
+        /*------------------------Printer Status---------------------------------------------------------*/
+
+        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
+
+        Printer printerStatus = Printer.newBuilder()
+                .setStatus(true)
                 .build();
 
-        Printer printStatus = Printer.newBuilder()
-                .setStatus(false)
+        PrinterStatusRequest printerStatusRequest = PrinterStatusRequest.newBuilder()
+                .setStatus(printerStatus)
                 .build();
+
+        PrinterStatusResponse printerStatusResponse = printClient.printerStatus(printerStatusRequest);
+
+        System.out.println(printerStatusResponse.getResult());
+
+
+        /*------------------------Vpn Status---------------------------------------------------------*/
+
+        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel1);
 
         Vpn vpnStatus = Vpn.newBuilder()
                 .setStatus(false)
                 .build();
 
-        Thermo thermoStatus = Thermo.newBuilder()
-                .setStatus(false)
-                .build();
-
-//-------------------------------------------------------------------------------------//
-        System.out.println("Building Protocol Buffer Requests...");
-        //do the same for a GreetRequest
-        GreetRequest greetRequest = GreetRequest.newBuilder()
-                .setGreeting(greeting)
-                .build();
-
-        //Unary Request
-        PrinterRequest printerRequest = PrinterRequest.newBuilder()
-                .setStatus(printStatus)
-                .build();
-
-        //Server Streaming Side
-        CheckPrinterRequest checkPrinterRequest =
-                CheckPrinterRequest.newBuilder()
-                        .setStatus(Printer.newBuilder().setStatus(true))
-                        .build();
-
-        VpnRequest vpnRequest = VpnRequest.newBuilder()
+        VpnStatusRequest vpnStatusRequest = VpnStatusRequest.newBuilder()
                 .setStatus(vpnStatus)
                 .build();
 
+        VpnStatusResponse vpnStatusResponse = vpnClient.vpnStatus(vpnStatusRequest);
+
+        System.out.println(vpnStatusResponse.getResult());
+
+        channel1.shutdown();
+
+        /*------------------------ThermoStat Status---------------------------------------------------------*/
+
+        ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel2);
+        Thermo thermoStatus = Thermo.newBuilder()
+                .setStatus(false)
+                .build();
         ThermoRequest thermoRequest = ThermoRequest.newBuilder()
                 .setStatus(thermoStatus)
                 .build();
 
+        ThermoResponse thermoResponse = thermoClient.thermoStatus(thermoRequest);
+        System.out.println(thermoResponse.getResult());
 
-//-------------------------------------------------------------------------------------//
-        System.out.println("Smart HomeOffice Active...");
-        //call the RPC and get back a Response (protocol buffers)
+        channel2.shutdown();
+    }
+    private void doServerStreamingCall(ManagedChannel channel) {
 
+        /*------------------------Check Printer ---------------------------------------------------------*/
 
-        GreetResponse greetResponse = greetClient.greet(greetRequest);
-        //Unary
-        PrinterResponse printResponse = printClient.printerStatus(printerRequest);
+        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
+
+        //Server Streaming Side
+        CheckPrinterRequest checkPrinterStatusRequest =
+                CheckPrinterRequest.newBuilder()
+                        .setStatus(Printer.newBuilder()
+                        .setStatus(true))
+                        .build();
+
         //Server Streaming
-        printClient.checkPrinter(checkPrinterRequest)
+        printClient.checkPrinter(checkPrinterStatusRequest)
                 .forEachRemaining(checkPrinterResponse -> {
                     System.out.println(checkPrinterResponse.getNetwork());
                     System.out.println(checkPrinterResponse.getCartridge());
@@ -115,23 +125,70 @@ public class Client {
                     System.out.println(checkPrinterResponse.getResult());
                 });
 
-        VpnResponse vpnResponse = vpnClient.vpnStatus(vpnRequest);
+        channel.shutdown();
 
-        ThermoResponse thermoResponse = thermoClient.thermoStatus(thermoRequest);
+        /*-----------------------------------------------------------------------------------------------*/
+    }
+    private void doClientStreamingCall(ManagedChannel channel) {
 
-        //Print the response from the server
-        System.out.println(greetResponse.getResult());
-        System.out.println(printResponse.getResult());
-        System.out.println(vpnResponse.getResult());
-        System.out.println(thermoResponse.getResult());
+        PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
 
-        //Shut our channels down
-        //System.out.println("Shutting down channels...");
-        // channel.shutdown();
-        // channel1.shutdown();
-        // channel2.shutdown();
-        // channel3.shutdown();
-        // }
+        CountDownLatch latch = new CountDownLatch(1);
 
+        StreamObserver<LongPrintTestRequest> requestObserver = asyncClient.longPrintTest(new StreamObserver<LongPrintTestResponse>() {
+            @Override
+            public void onNext(LongPrintTestResponse value) {
+                //we get a response from the server
+                System.out.println("Received Response from the server");
+                System.out.println(value.getResult());
+                //onNext will only be called once
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                //we get an error from the server
+            }
+
+            @Override
+            public void onCompleted() {
+                //the server is done sending us data
+                //onCompleted will be called right after onNext()
+                System.out.println("Server has completed sending data");
+               latch.countDown();
+            }
+        });
+        //Sending Message 1
+        requestObserver.onNext(LongPrintTestRequest.newBuilder()
+                .setTp(Printer.newBuilder()
+                    .setTestpage("\nThis Is The Test Page")
+                     .build())
+                .build());
+
+        //Sending Message 2
+        requestObserver.onNext(LongPrintTestRequest.newBuilder()
+                .setTp(Printer.newBuilder()
+                        .setTestpage("\nIf this page is visible to\n"+
+                                    "you then you are right in \n"+
+                                    "presuming that the printer\n"+
+                                    "is working correctly      \n"+
+                                    "White Ink Test Complete   \n")
+                        .build())
+                .build());
+
+        //Sending Message 3
+        requestObserver.onNext(LongPrintTestRequest.newBuilder()
+                .setTp(Printer.newBuilder()
+                        .setTestpage("End of TestPage \n")
+                        .build())
+                .build());
+
+        //we tell the server that that client is done sending data
+        requestObserver.onCompleted();
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        channel.shutdown();
     }
 }

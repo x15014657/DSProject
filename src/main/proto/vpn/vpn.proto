@@ -8,14 +8,14 @@ option java_multiple_files = true;
 message Vpn {
     bool status = 1;
 }
-message VpnRequest {
+message VpnStatusRequest {
     Vpn status = 1;
 }
-message VpnResponse {
+message VpnStatusResponse {
     string result = 1;
 }
 
 //define and name service - make readable
 service VpnService{
-    rpc VpnStatus(VpnRequest) returns (VpnResponse) {};
+    rpc VpnStatus(VpnStatusRequest) returns (VpnStatusResponse) {};
 }

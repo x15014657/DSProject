@@ -1,15 +1,16 @@
 package com.conorjc.dsproject.server;
 
+
 import com.proto.vpn.Vpn;
-import com.proto.vpn.VpnRequest;
-import com.proto.vpn.VpnResponse;
 import com.proto.vpn.VpnServiceGrpc;
+import com.proto.vpn.VpnStatusRequest;
+import com.proto.vpn.VpnStatusResponse;
 import io.grpc.stub.StreamObserver;
 
 public class VpnServiceImpl extends VpnServiceGrpc.VpnServiceImplBase {
 
         @Override
-        public void vpnStatus(VpnRequest request, StreamObserver<VpnResponse> responseObserver) {
+        public void vpnStatus(VpnStatusRequest request, StreamObserver<VpnStatusResponse> responseObserver) {
                 Vpn vpnStatus = request.getStatus();
                 boolean status = vpnStatus.getStatus();
 
@@ -21,7 +22,7 @@ public class VpnServiceImpl extends VpnServiceGrpc.VpnServiceImplBase {
         result = "The Vpn is Online";
         }
 
-        VpnResponse response = VpnResponse.newBuilder()
+                VpnStatusResponse response = VpnStatusResponse.newBuilder()
         .setResult(result)
         .build();
 
