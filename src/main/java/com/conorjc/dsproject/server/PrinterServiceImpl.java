@@ -9,7 +9,6 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         Printer printStatus = request.getStatus();
         boolean status = printStatus.getStatus();
 
-
         //create the  response
         String result;
         if (!(status)) {
@@ -24,12 +23,8 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
         //sends response to client
         responseObserver.onNext(response);
-
         //complete the RPC call
         responseObserver.onCompleted();
-
-        // super.greet(request, responseObserver);
-
     }
 
     @Override
@@ -38,7 +33,6 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         boolean status = checkPrinter.getStatus();
 
         //create the action before the response
-
         if (status) {
             try {
                 for (int i = 1; i < 4; i++) {
@@ -53,7 +47,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
                             .build();
 
                     responseObserver.onNext(response);
-                    Thread.sleep(3000L);
+                    Thread.sleep(1L);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -69,9 +63,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
     @Override
     public StreamObserver<LongPrintTestRequest> longPrintTest(StreamObserver<LongPrintTestResponse> responseObserver) {
-
         return new StreamObserver<LongPrintTestRequest>() {
-
             String result = "";
 
             @Override

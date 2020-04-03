@@ -15,34 +15,29 @@ import java.util.concurrent.TimeUnit;
 
 public class Client {
 
-
     public static void main(String[] args) {
-
         Client main = new Client();
         main.run();
     }
     private void run()  {
 
         System.out.println("Client Interface Initialising...");
-
         System.out.println("Building Channels...");
+
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50050)
                 .usePlaintext()
                 .build();
-
         ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 50051)
                 .usePlaintext()
                 .build();
-
         ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 50052)
                 .usePlaintext()
                 .build();
 
-
-
+       // Comment & Un-Comment To Use Different Streams
       //  doUnaryCall(channel, channel1, channel2);
-      //  doServerStreamingCall(channel);
-        doClientStreamingCall(channel);
+        doServerStreamingCall(channel);
+      //  doClientStreamingCall(channel);
 
        /* System.out.println("Shutting Down Channels");
         channel.shutdown();
@@ -168,10 +163,10 @@ public class Client {
         requestObserver.onNext(LongPrintTestRequest.newBuilder()
                 .setTp(Printer.newBuilder()
                         .setTestpage("\nIf this page is visible to\n"+
-                                    "you then you are right in \n"+
-                                    "presuming that the printer\n"+
-                                    "is working correctly      \n"+
-                                    "White Ink Test Complete   \n")
+                                     "you then you are right in \n"+
+                                     "presuming that the printer\n"+
+                                     "is working correctly!!!   \n"+
+                                     "White Ink Test Complete   \n")
                         .build())
                 .build());
 

@@ -28,7 +28,6 @@ public class Server {
                 .build();
 
         //start our server
-
         server.start();
         server1.start();
         server2.start();
