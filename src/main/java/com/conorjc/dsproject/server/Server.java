@@ -1,11 +1,16 @@
 package com.conorjc.dsproject.server;
 
 
+import com.conorjc.dsproject.impl.PrinterServiceImpl;
+import com.conorjc.dsproject.impl.ThermoServiceImpl;
+import com.conorjc.dsproject.impl.VpnServiceImpl;
 import io.grpc.ServerBuilder;
+
 import java.io.IOException;
+
 public class Server {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         System.out.println("Servers Initialising...");
 
 
@@ -13,24 +18,50 @@ public class Server {
 
 
         io.grpc.Server server =
-                ServerBuilder.forPort(50050)
+                ServerBuilder.forPort(5000)
                 .addService(new PrinterServiceImpl())
                 .build();
 
+        try
+        {
+            server.start();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
         io.grpc.Server server1 =
-        ServerBuilder.forPort(50051)
+        ServerBuilder.forPort(5001)
                 .addService(new VpnServiceImpl())
                 .build();
 
+
+        try
+        {
+            server1.start();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+
         io.grpc.Server server2 =
-        ServerBuilder.forPort(50052)
+        ServerBuilder.forPort(5002)
                 .addService(new ThermoServiceImpl())
                 .build();
 
-        //start our server
-        server.start();
-        server1.start();
-        server2.start();
+        try
+        {
+            server2.start();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
         System.out.println("Server Initialised");
 
         //allow our server to accept a request to shutdown, this needs to go before termination

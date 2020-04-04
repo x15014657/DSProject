@@ -19,29 +19,30 @@ public class Client {
         Client main = new Client();
         main.run();
     }
-    private void run()  {
+    public void run()  {
 
         System.out.println("Client Interface Initialising...");
         System.out.println("Building Channels...");
 
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50050)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5000)
                 .usePlaintext()
                 .build();
-        ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 50051)
+        ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 5001)
                 .usePlaintext()
                 .build();
-        ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 50052)
+        ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 5002)
                 .usePlaintext()
                 .build();
 
        // Comment & Un-Comment To Use Different Streams
-      //  doUnaryCall(channel, channel1, channel2);
+
+        doUnaryCall(channel, channel1, channel2);
         doServerStreamingCall(channel);
-      //  doClientStreamingCall(channel);
+        //doClientStreamingCall(channel);
 
        /* System.out.println("Shutting Down Channels");
         channel.shutdown();
-        channel1.shutdown();
+        channel.shutdown();
         channel2.shutdown();
         channel3.shutdown();*/
 
@@ -65,6 +66,7 @@ public class Client {
         System.out.println(printerStatusResponse.getResult());
 
 
+
         /*------------------------Vpn Status---------------------------------------------------------*/
 
         VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel1);
@@ -81,7 +83,7 @@ public class Client {
 
         System.out.println(vpnStatusResponse.getResult());
 
-        channel1.shutdown();
+
 
         /*------------------------ThermoStat Status---------------------------------------------------------*/
 
@@ -96,7 +98,7 @@ public class Client {
         ThermoResponse thermoResponse = thermoClient.thermoStatus(thermoRequest);
         System.out.println(thermoResponse.getResult());
 
-        channel2.shutdown();
+
     }
     private void doServerStreamingCall(ManagedChannel channel) {
 
@@ -120,7 +122,7 @@ public class Client {
                     System.out.println(checkPrinterResponse.getResult());
                 });
 
-        channel.shutdown();
+
 
         /*-----------------------------------------------------------------------------------------------*/
     }
@@ -185,5 +187,6 @@ public class Client {
             e.printStackTrace();
         }
         channel.shutdown();
+
     }
 }

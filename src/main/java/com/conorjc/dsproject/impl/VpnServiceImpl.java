@@ -1,4 +1,4 @@
-package com.conorjc.dsproject.server;
+package com.conorjc.dsproject.impl;
 
 
 import com.proto.vpn.Vpn;
@@ -14,23 +14,23 @@ public class VpnServiceImpl extends VpnServiceGrpc.VpnServiceImplBase {
                 Vpn vpnStatus = request.getStatus();
                 boolean status = vpnStatus.getStatus();
 
-        //create the  response
-        String result;
-        if(!status){
-        result = "The Vpn is Offline";
-        }else{
-        result = "The Vpn is Online";
-        }
+                //create the  response
+                String result;
+                if(!status){
+                        result = "The Vpn is Offline";
+                }else{
+                        result = "The Vpn is Online";
+                }
 
                 VpnStatusResponse response = VpnStatusResponse.newBuilder()
-        .setResult(result)
-        .build();
+                        .setResult(result)
+                        .build();
 
-        //sends response to client
-        responseObserver.onNext(response);
+                //sends response to client
+                responseObserver.onNext(response);
 
-        //complete the RPC call
-        responseObserver.onCompleted();
+                //complete the RPC call
+                responseObserver.onCompleted();
 
         }
 
