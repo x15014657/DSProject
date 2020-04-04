@@ -1,25 +1,33 @@
 package com.conorjc.dsproject.client;
 
+import com.conorjc.dsproject.jmdns.GetRequest;
 import com.proto.printer.*;
 import com.proto.thermo.Thermo;
 import com.proto.thermo.ThermoRequest;
 import com.proto.thermo.ThermoResponse;
 import com.proto.thermo.ThermoServiceGrpc;
-import com.proto.vpn.*;
+import com.proto.vpn.Vpn;
+import com.proto.vpn.VpnServiceGrpc;
+import com.proto.vpn.VpnStatusRequest;
+import com.proto.vpn.VpnStatusResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
+import javax.jmdns.ServiceListener;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.rmi.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 
 public class Client {
 
-    public static void main(String[] args) {
-        Client main = new Client();
-        main.run();
-    }
-    public void run()  {
+    public void run() {
 
         System.out.println("Client Interface Initialising...");
         System.out.println("Building Channels...");
@@ -34,11 +42,12 @@ public class Client {
                 .usePlaintext()
                 .build();
 
-       // Comment & Un-Comment To Use Different Streams
+        // Comment & Un-Comment To Use Different Streams
 
         doUnaryCall(channel, channel1, channel2);
         doServerStreamingCall(channel);
         //doClientStreamingCall(channel);
+
 
        /* System.out.println("Shutting Down Channels");
         channel.shutdown();
@@ -47,6 +56,7 @@ public class Client {
         channel3.shutdown();*/
 
     }
+
     private void doUnaryCall(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2) {
 
         /*------------------------Printer Status---------------------------------------------------------*/
@@ -100,6 +110,7 @@ public class Client {
 
 
     }
+
     private void doServerStreamingCall(ManagedChannel channel) {
 
         /*------------------------Check Printer ---------------------------------------------------------*/
@@ -110,7 +121,7 @@ public class Client {
         CheckPrinterRequest checkPrinterStatusRequest =
                 CheckPrinterRequest.newBuilder()
                         .setStatus(Printer.newBuilder()
-                        .setStatus(true))
+                                .setStatus(true))
                         .build();
 
         //Server Streaming
@@ -126,6 +137,7 @@ public class Client {
 
         /*-----------------------------------------------------------------------------------------------*/
     }
+
     private void doClientStreamingCall(ManagedChannel channel) {
 
         PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
@@ -151,24 +163,24 @@ public class Client {
                 //the server is done sending us data
                 //onCompleted will be called right after onNext()
                 System.out.println("Server has completed sending data");
-               latch.countDown();
+                latch.countDown();
             }
         });
         //Sending Message 1
         requestObserver.onNext(LongPrintTestRequest.newBuilder()
                 .setTp(Printer.newBuilder()
-                    .setTestpage("\nThis Is The Test Page")
-                     .build())
+                        .setTestpage("\nThis Is The Test Page")
+                        .build())
                 .build());
 
         //Sending Message 2
         requestObserver.onNext(LongPrintTestRequest.newBuilder()
                 .setTp(Printer.newBuilder()
-                        .setTestpage("\nIf this page is visible to\n"+
-                                     "you then you are right in \n"+
-                                     "presuming that the printer\n"+
-                                     "is working correctly!!!   \n"+
-                                     "White Ink Test Complete   \n")
+                        .setTestpage("\nIf this page is visible to\n" +
+                                "you then you are right in \n" +
+                                "presuming that the printer\n" +
+                                "is working correctly!!!   \n" +
+                                "White Ink Test Complete   \n")
                         .build())
                 .build());
 
@@ -189,4 +201,47 @@ public class Client {
         channel.shutdown();
 
     }
+
+
+    public static void main(String[] args) throws IOException {
+        Client main = new Client();
+        main.run();
+
+        try {
+            // Create a JmDNS instance
+            JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+
+            // Add a service listener
+            jmdns.addServiceListener("_printerServiceImpl._tcp.local.", new SampleListener());
+
+        } catch (UnknownHostException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    private static class SampleListener implements ServiceListener {
+        @Override
+        public void serviceAdded(ServiceEvent event) {
+            System.out.println("Service added: " + event.getInfo());
+        }
+
+        @Override
+        public void serviceRemoved(ServiceEvent event) {
+            System.out.println("Service removed: " + event.getInfo());
+        }
+
+        @Override
+        public void serviceResolved(ServiceEvent event) {
+            ServiceInfo info = event.getInfo();
+            int port = info.getPort();
+            String path = info.getNiceTextString().split("=")[1];
+            GetRequest.request("localhost:" + port + "/" + path);
+        }
+    }
 }
+
+
+

@@ -29,7 +29,7 @@ public class ExampleServiceDiscovery {
             ServiceInfo info = event.getInfo();
             int port = info.getPort();
             String path = info.getNiceTextString().split("=")[1];
-            GetRequest.request("http://localhost:" + port + "/" + path);
+            GetRequest.request("localhost:" + port + "/" + path);
         }
     }
 
@@ -39,7 +39,7 @@ public class ExampleServiceDiscovery {
             JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
 
             // Add a service listener
-            jmdns.addServiceListener("_http._tcp.local.", new SampleListener());
+            jmdns.addServiceListener("_printerServiceImpl._tcp.local.", new SampleListener());
 
         } catch (UnknownHostException e) {
             System.out.println(e.getMessage());

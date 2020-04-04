@@ -6,11 +6,18 @@ import com.conorjc.dsproject.impl.ThermoServiceImpl;
 import com.conorjc.dsproject.impl.VpnServiceImpl;
 import io.grpc.ServerBuilder;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Date;
 
 public class Server {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
         System.out.println("Servers Initialising...");
 
 
@@ -19,9 +26,8 @@ public class Server {
 
         io.grpc.Server server =
                 ServerBuilder.forPort(5000)
-                .addService(new PrinterServiceImpl())
-                .build();
-
+                        .addService(new PrinterServiceImpl())
+                        .build();
         try
         {
             server.start();
@@ -31,11 +37,11 @@ public class Server {
             e.printStackTrace();
         }
 
+
         io.grpc.Server server1 =
         ServerBuilder.forPort(5001)
                 .addService(new VpnServiceImpl())
                 .build();
-
 
         try
         {
@@ -52,29 +58,37 @@ public class Server {
                 .addService(new ThermoServiceImpl())
                 .build();
 
-        try
-        {
+        try {
             server2.start();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
 
         System.out.println("Server Initialised");
 
-        //allow our server to accept a request to shutdown, this needs to go before termination
-        Runtime.getRuntime().addShutdownHook(new Thread( () -> {
-            System.out.println("Received Shutdown Requests");
-            //server.shutdown();
-            //server1.shutdown();
-           // server2.shutdown();
+        int port = 5000;
+        JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+        // Register a service
+        ServiceInfo serviceInfo = ServiceInfo.create("_printerServiceImpl._tcp.local.", "Printer Service", port, "Will Supply a number of Printing services");
+        jmdns.registerService(serviceInfo);
+        System.out.println("Starting the Print Server loop");
 
-            System.out.println("Successfully Shutdown Servers");
-        } ));
-
-        server.awaitTermination();
+        ServerSocket listener = new ServerSocket(6000);
+        try {
+            while (true) {
+                Socket socket = listener.accept();
+                try {
+                    PrintWriter out
+                            = new PrintWriter(socket.getOutputStream(), true);
+                    out.println(new Date().toString());
+                } finally {
+                    socket.close();
+                }
+            }
+        } finally {
+            listener.close();
+        }
 
     }
 
