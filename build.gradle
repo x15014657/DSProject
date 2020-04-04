@@ -33,6 +33,11 @@ protobuf {
         //noinspection GroovyAssignabilityCheck
         //noinspection GrUnresolvedAccess
         //noinspection GroovyAssignabilityCheck
+        //noinspection GrUnresolvedAccess
+        //noinspection GroovyAssignabilityCheck
+        //noinspection GroovyAssignabilityCheck
+        //noinspection GrUnresolvedAccess
+        //noinspection GrUnresolvedAccess
         all()*.plugins {
             //noinspection GrUnresolvedAccess
             grpc {}

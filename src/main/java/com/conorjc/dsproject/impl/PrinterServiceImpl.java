@@ -1,14 +1,6 @@
 package com.conorjc.dsproject.impl;
 
 import com.proto.printer.*;
-import com.proto.thermo.Thermo;
-import com.proto.thermo.ThermoRequest;
-import com.proto.thermo.ThermoResponse;
-import com.proto.thermo.ThermoServiceGrpc;
-import com.proto.vpn.Vpn;
-import com.proto.vpn.VpnServiceGrpc;
-import com.proto.vpn.VpnStatusRequest;
-import com.proto.vpn.VpnStatusResponse;
 import io.grpc.stub.StreamObserver;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
