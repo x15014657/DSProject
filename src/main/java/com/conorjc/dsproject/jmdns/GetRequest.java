@@ -20,6 +20,7 @@ public class GetRequest {
                     .resource(url);
 
             ClientResponse response = webResource.get(ClientResponse.class);
+
             if (response.getStatus() != 200) {
                 throw new RuntimeException("Failed : HTTP error code : "
                         + response.getStatus());

@@ -3,6 +3,8 @@ package com.conorjc.dsproject.impl;
 import com.proto.printer.*;
 import io.grpc.stub.StreamObserver;
 
+import java.util.EmptyStackException;
+
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
     public void printerStatus(PrinterStatusRequest request, StreamObserver<PrinterStatusResponse> responseObserver) {
@@ -90,5 +92,29 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         };
     }
 
+    @Override
+    public StreamObserver<DocumentPrintRequest> documentPrint(StreamObserver<DocumentPrintResponse> responseObserver) {
+        StreamObserver<DocumentPrintRequest> requestObserver = new StreamObserver<DocumentPrintRequest>() {
+            @Override
+            public void onNext(DocumentPrintRequest value) {
+                String result = "Printing Document Queu: " + value.getDts().getDocuments();
+                DocumentPrintResponse documentPrintResponse = new DocumentPrintResponse().newBuilder()
+                        .setResult(result)
+                        .build();
 
+                responseObserver.onNext(documentPrintResponse);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                throw new EmptyStackException();
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+        return requestObserver;
+    }
 }

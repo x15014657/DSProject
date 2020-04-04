@@ -21,6 +21,7 @@ import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.rmi.UnknownHostException;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -44,10 +45,10 @@ public class Client {
 
         // Comment & Un-Comment To Use Different Streams
 
-        doUnaryCall(channel, channel1, channel2);
-        doServerStreamingCall(channel);
+        //doUnaryCall(channel, channel1, channel2);
+        //doServerStreamingCall(channel);
         //doClientStreamingCall(channel);
-
+        doBiDiStreamingCall(channel);
 
        /* System.out.println("Shutting Down Channels");
         channel.shutdown();
@@ -141,7 +142,6 @@ public class Client {
     private void doClientStreamingCall(ManagedChannel channel) {
 
         PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
-
         CountDownLatch latch = new CountDownLatch(1);
 
         StreamObserver<LongPrintTestRequest> requestObserver = asyncClient.longPrintTest(new StreamObserver<LongPrintTestResponse>() {
@@ -202,6 +202,52 @@ public class Client {
 
     }
 
+    private void doBiDiStreamingCall(ManagedChannel channel) {
+
+        PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<DocumentPrintRequest> requestObserver = asyncClient.documentPrint(new StreamObserver<DocumentPrintResponse>() {
+            @Override
+            public void onNext(DocumentPrintResponse value) {
+                System.out.println("" + value.getResult());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server is done sending data");
+                latch.countDown(); //countdown the latch and free the request
+            }
+        });
+
+        Arrays.asList("Document 1", "Document 2", "Document 3", "Document 4").forEach(
+                documents -> {
+                    System.out.println("Sending: " + documents);
+                    requestObserver.onNext(DocumentPrintRequest.newBuilder()
+                            .setDts(Printer.newBuilder()
+                                    .setDocuments(documents)
+                                    .build())
+                            .build());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+        requestObserver.onCompleted();
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        channel.shutdown();
+    }
 
     public static void main(String[] args) throws IOException {
         Client main = new Client();
@@ -219,7 +265,6 @@ public class Client {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-
     }
 
     private static class SampleListener implements ServiceListener {

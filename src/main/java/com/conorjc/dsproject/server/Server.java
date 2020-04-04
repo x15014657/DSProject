@@ -5,7 +5,6 @@ import com.conorjc.dsproject.impl.PrinterServiceImpl;
 import com.conorjc.dsproject.impl.ThermoServiceImpl;
 import com.conorjc.dsproject.impl.VpnServiceImpl;
 import io.grpc.ServerBuilder;
-
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 import java.io.IOException;
@@ -13,50 +12,40 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 
 public class Server {
 
-    public static void main(String[] args) throws InterruptedException, IOException {
+    public static void main(String[] args) throws IOException {
         System.out.println("Servers Initialising...");
-
-
         System.out.println("Adding services...");
-
 
         io.grpc.Server server =
                 ServerBuilder.forPort(5000)
                         .addService(new PrinterServiceImpl())
                         .build();
-        try
-        {
+        try {
             server.start();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
 
         io.grpc.Server server1 =
-        ServerBuilder.forPort(5001)
-                .addService(new VpnServiceImpl())
-                .build();
+                ServerBuilder.forPort(5001)
+                        .addService(new VpnServiceImpl())
+                        .build();
 
-        try
-        {
+        try {
             server1.start();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
 
         io.grpc.Server server2 =
-        ServerBuilder.forPort(5002)
-                .addService(new ThermoServiceImpl())
-                .build();
+                ServerBuilder.forPort(5002)
+                        .addService(new ThermoServiceImpl())
+                        .build();
 
         try {
             server2.start();
@@ -81,15 +70,17 @@ public class Server {
                 try {
                     PrintWriter out
                             = new PrintWriter(socket.getOutputStream(), true);
-                    out.println(new Date().toString());
+                    out.println(new PrinterServiceImpl().toString());
+                } catch (IOException e) {
+                    e.printStackTrace();
+
                 } finally {
                     socket.close();
+                    listener.close();
                 }
             }
-        } finally {
-            listener.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
     }
-
 }

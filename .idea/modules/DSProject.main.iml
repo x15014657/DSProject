@@ -60,7 +60,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../jmdns-3.4.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../src/main/resources/jersey-bundle-1.19.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -69,7 +69,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../jersey-bundle-1.19.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../src/main/resources/jersey-client-1.19.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -78,7 +78,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../testng-7.1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../src/main/resources/jmdns-3.4.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../src/main/resources/testng-7.1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

@@ -7,12 +7,11 @@ import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.net.UnknownHostException;
 
 
 // This code is adapted from https://github.com/jmdns/jmdns
 
-public class ExampleServiceDiscovery {
+public class ServiceDiscovery {
 
 
     private static class SampleListener implements ServiceListener {
@@ -27,7 +26,6 @@ public class ExampleServiceDiscovery {
 
         @Override
         public void serviceRemoved(ServiceEvent event) {
-
             System.out.println("Service removed: " + event.getInfo());
         }
 
@@ -45,7 +43,7 @@ public class ExampleServiceDiscovery {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         try {
             // Create a JmDNS instance
             JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
@@ -53,8 +51,6 @@ public class ExampleServiceDiscovery {
             // Add a service listener
             jmdns.addServiceListener("_printerServiceImpl._tcp.local.", new SampleListener());
 
-        } catch (UnknownHostException e) {
-            System.out.println(e.getMessage());
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -75,7 +71,7 @@ public class ExampleServiceDiscovery {
         }
     }
 
-    public static int findFreePort() throws IOException {
+    public static int findPort() throws IOException {
         ServerSocket server = new ServerSocket(0);
         int port = server.getLocalPort();
         server.close();

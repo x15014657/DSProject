@@ -46,11 +46,12 @@ protobuf {
 }
 
 dependencies {
-    implementation 'io.grpc:grpc-netty-shaded:1.28.0'
+    implementation 'io.grpc:grpc-netty-shaded:1.28.0' //adds ssl libraries
     implementation 'io.grpc:grpc-protobuf:1.28.0'
     implementation 'io.grpc:grpc-stub:1.28.0'
     implementation 'junit:junit:4.12'
     implementation 'org.testng:testng:6.9.6'
+
 
 }
 
