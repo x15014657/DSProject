@@ -6,6 +6,7 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 
@@ -13,23 +14,34 @@ import java.net.UnknownHostException;
 
 public class ExampleServiceDiscovery {
 
+
     private static class SampleListener implements ServiceListener {
+
+        ServiceObserver observer;
+
         @Override
         public void serviceAdded(ServiceEvent event) {
             System.out.println("Service added: " + event.getInfo());
+            event.getDNS().requestServiceInfo(event.getType(), event.getName(), 0);
         }
 
         @Override
         public void serviceRemoved(ServiceEvent event) {
+
             System.out.println("Service removed: " + event.getInfo());
         }
 
         @Override
-        public void serviceResolved(ServiceEvent event) {
-            ServiceInfo info = event.getInfo();
-            int port = info.getPort();
-            String path = info.getNiceTextString().split("=")[1];
-            GetRequest.request("localhost:" + port + "/" + path);
+        public void serviceResolved(ServiceEvent arg0) {
+
+            System.out.println(arg0);
+            String address = arg0.getInfo().getHostAddress();
+            int port = arg0.getInfo().getPort();
+            String type = arg0.getInfo().getType();
+
+            if (observer != null && observer.interested(type)) {
+                observer.serviceAdded(new ServiceDescription(address, port));
+            }
         }
     }
 
@@ -46,5 +58,36 @@ public class ExampleServiceDiscovery {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private JmDNS jmdns;
+    private ServiceInfo info;
+
+    public void JmDNSRegistrationHelper(String name, String type, String location, int port) {
+        try {
+            jmdns = JmDNS.create(InetAddress.getLocalHost());
+            info = ServiceInfo.create(type, name, port,
+                    "params=" + location);
+            jmdns.registerService(info);
+            System.out.println("ServiceInfo: " + info.toString() + "\nJMDNS: " + jmdns.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int findFreePort() throws IOException {
+        ServerSocket server = new ServerSocket(0);
+        int port = server.getLocalPort();
+        server.close();
+        return port;
+    }
+
+    public void deRegister() {
+        jmdns.unregisterService(info);
+
+    }
+
+    public ServiceInfo getInfo() {
+        return info;
     }
 }
