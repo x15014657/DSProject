@@ -3,18 +3,20 @@ package com.conorjc.dsproject.impl;
 import com.proto.thermo.*;
 import io.grpc.stub.StreamObserver;
 
+import java.util.EmptyStackException;
+
 public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
 
-    @Override
+    @Override //Unary
     public void thermoStatus(ThermoRequest request, StreamObserver<ThermoResponse> responseObserver) {
         Thermo thermoStatus = request.getStatus();
         boolean status = thermoStatus.getStatus();
 
         //create the  response
         String result;
-        if(!status){
+        if (!status) {
             result = "The Thermostat is Offline";
-        }else{
+        } else {
             result = "The Thermostat is Online";
         }
 
@@ -30,10 +32,10 @@ public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
 
     }
 
-    @Override
+    @Override //server streaming
     public void heatUpService(HeatUpRequest request, StreamObserver<HeatUpResponse> responseObserver) {
 
-        Thermo warm = request.getStatus();
+        Thermo warm = request.getStat();
         boolean stat = warm.getStatus();
 
         //create the action before the response
@@ -55,7 +57,6 @@ public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                System.out.println("System is offline");
             }
         }
         String result = ("Thermostat set to Warmest Setting.");
@@ -64,4 +65,58 @@ public class ThermoServiceImpl extends ThermoServiceGrpc.ThermoServiceImplBase {
                 .build();
         responseObserver.onNext(response);
     }
+
+    @Override //client streaming
+    public StreamObserver<CoolAirRequest> coolAirService(StreamObserver<CoolAirResponse> responseObserver) {
+        return new StreamObserver<CoolAirRequest>() {
+            String result = "";
+
+
+            @Override
+            public void onNext(CoolAirRequest value) {
+                result += " " + value.getStc().getCold();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(
+                        CoolAirResponse.newBuilder().setResult(result)
+                                .build()
+                );
+                responseObserver.onCompleted();
+            }
+        };
+    }
+
+    @Override
+    public StreamObserver<ThermoMonitorRequest> thermoMonitorService(StreamObserver<ThermoMonitorResponse> responseObserver) {
+        StreamObserver<ThermoMonitorRequest> requestObserver = new StreamObserver<ThermoMonitorRequest>() {
+            @Override
+            public void onNext(ThermoMonitorRequest value) {
+                String result = "Sending Sensor Data..temperature";
+                ThermoMonitorResponse thermoMonitorResponse = ThermoMonitorResponse.newBuilder()
+                        .setResult(result)
+                        .build();
+
+                responseObserver.onNext(thermoMonitorResponse);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                throw new EmptyStackException();
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onCompleted();
+            }
+        };
+      return requestObserver;
+    }
 }
+

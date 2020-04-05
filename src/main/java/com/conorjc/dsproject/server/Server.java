@@ -32,7 +32,7 @@ public class Server {
 
         io.grpc.Server server1 =
                 ServerBuilder.forPort(5001)
-                        .addService(new VpnServiceImpl())
+                        .addService(new ThermoServiceImpl())
                         .build();
 
         try {
@@ -44,7 +44,7 @@ public class Server {
 
         io.grpc.Server server2 =
                 ServerBuilder.forPort(5002)
-                        .addService(new ThermoServiceImpl())
+                        .addService(new VpnServiceImpl())
                         .build();
 
         try {
@@ -59,7 +59,7 @@ public class Server {
         server1.awaitTermination();
         server2.awaitTermination();
 
-        int port = 5000;
+        int port = 6000;
         JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
         // Register a service
         ServiceInfo serviceInfo = ServiceInfo.create("_printerServiceImpl._tcp.local.", "Printer Service", port, "Will Supply a number of Printing services");

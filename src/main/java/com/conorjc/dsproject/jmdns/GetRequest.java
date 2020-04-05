@@ -6,6 +6,7 @@
 package com.conorjc.dsproject.jmdns;
 
 
+import com.sun.jersey.api.client.AbstractClientRequestAdapter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;

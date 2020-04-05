@@ -10,6 +10,8 @@ import com.proto.vpn.VpnStatusResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import org.testng.internal.thread.ICountDown;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
@@ -21,7 +23,6 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-
 public class Client {
 
     public void run() {
@@ -29,34 +30,34 @@ public class Client {
         System.out.println("Client Interface Initialising...");
         System.out.println("Building Channels...");
 
-
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5000)
                 .usePlaintext()
                 .build();
-
         ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 5001)
                 .usePlaintext()
                 .build();
-
         ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 5002)
                 .usePlaintext()
                 .build();
-
         ManagedChannel channel3 = ManagedChannelBuilder.forAddress("localhost", 5003)
                 .usePlaintext()
                 .build();
 
         // Comment & Un-Comment To Use Different Streams
+        UnaryServices(channel, channel1, channel2, channel3);
 
-
-        // UnaryServices(channel, channel1, channel2, channel3);
-        //PrinterTestServerSide(channel);
-        HeatUpServiceServerSide(channel);
-        //ClientStreamingServices(channel, channel1, channel2, channel3);
+        //PrintTestPageService(channel);
+        // PrinterTestServerSide(channel);
         //PrintDocuments(channel);
+
+        //HeatUpServiceServerSide(channel);
+        //CoolDownServiceClientSide(channel);
+        //ThermoMonitorService(channel);
+
+
+
     }
-
-
+    //Unary Services - One Request and one Response
     private void UnaryServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
 
         /*------- Check Printer Status------*/
@@ -77,7 +78,7 @@ public class Client {
 
         /*-----------Vpn Status-----------*/
 
-        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel);
+        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel1);
 
         Vpn vpnStatus = Vpn.newBuilder()
                 .setStatus(false)
@@ -88,16 +89,14 @@ public class Client {
                 .build();
 
         VpnStatusResponse vpnStatusResponse = vpnClient.vpnStatus(vpnStatusRequest);
-
         System.out.println(vpnStatusResponse.getResult());
 
-        channel.shutdown();
 
         /*------------ThermoStat Status------------*/
 
         ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel2);
         Thermo thermoStatus = Thermo.newBuilder()
-                .setStatus(false)
+                .setStatus(true)
                 .build();
         ThermoRequest thermoRequest = ThermoRequest.newBuilder()
                 .setStatus(thermoStatus)
@@ -108,56 +107,8 @@ public class Client {
 
     }
 
-    private void PrinterTestServerSide(ManagedChannel channel) {
-
-        /*------- Check Printer (Tests)------*/
-
-        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
-
-        //Server Streaming Side
-        CheckPrinterRequest checkPrinterRequest = CheckPrinterRequest.newBuilder()
-                .setStatus(Printer.newBuilder()
-                        .setStatus(true))
-                .build();
-
-        //Server Streaming
-        printClient.checkPrinter(checkPrinterRequest)
-                .forEachRemaining(checkPrinterResponse -> {
-                    System.out.println(checkPrinterResponse.getNetwork());
-                    System.out.println(checkPrinterResponse.getCartridge());
-                    System.out.println(checkPrinterResponse.getInk());
-                    System.out.println(checkPrinterResponse.getResult());
-                });
-
-        channel.shutdown();
-
-    }
-
-    private void HeatUpServiceServerSide(ManagedChannel channel){
-        /*-------Heat Up Service------*/
-
-        ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel);
-
-        //Server Streaming Side
-        HeatUpRequest heatUpRequest = HeatUpRequest.newBuilder()
-                .setStatus(Thermo.newBuilder()
-                        .setStatus(true))
-                .build();
-
-        //Server Streaming
-        thermoClient.heatUpService(heatUpRequest)
-                .forEachRemaining(heatUpResponse -> {
-                    System.out.println(heatUpResponse.getLevel1());
-                    System.out.println(heatUpResponse.getLevel2());
-                    System.out.println(heatUpResponse.getLevel3());
-                    System.out.println(heatUpResponse.getResult());
-                });
-
-        channel.shutdown();
-
-    }
-
-    private void ClientStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+    //The Printer Services - SelfTest, TestPage, PrintQueueDocuments
+    private void PrintTestPageService(ManagedChannel channel) {
 
         /*------- Print Test Page------*/
 
@@ -221,7 +172,30 @@ public class Client {
         }
         channel.shutdown();
     }
+    private void PrinterTestServerSide(ManagedChannel channel) {
 
+        /*------- Check Printer (Tests)------*/
+
+        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
+
+        //Server Streaming Side
+        CheckPrinterRequest checkPrinterRequest = CheckPrinterRequest.newBuilder()
+                .setStatus(Printer.newBuilder()
+                        .setStatus(true))
+                .build();
+
+        //Server Streaming
+        printClient.checkPrinter(checkPrinterRequest)
+                .forEachRemaining(checkPrinterResponse -> {
+                    System.out.println(checkPrinterResponse.getNetwork());
+                    System.out.println(checkPrinterResponse.getCartridge());
+                    System.out.println(checkPrinterResponse.getInk());
+                    System.out.println(checkPrinterResponse.getResult());
+                });
+
+        channel.shutdown();
+
+    }
     private void PrintDocuments(ManagedChannel channel) {
 
         /*------- Print Documents BiDi Streaming------*/
@@ -246,7 +220,6 @@ public class Client {
                 latch.countDown(); //countdown the latch and free the request
             }
         });
-
         Arrays.asList("Document 1", "Document 2", "Document 3", "Document 4").forEach(
                 documents -> {
                     System.out.println("Sending: " + documents);
@@ -269,8 +242,79 @@ public class Client {
         }
     }
 
+
+   //ThermoStat Services - HeatUp, CoolDown, ThermoMonitor
+    private void HeatUpServiceServerSide(ManagedChannel channel){
+        /*-------Heat Up Service------*/
+
+        ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel);
+
+        //Server Streaming Side
+        HeatUpRequest heatUpRequest = HeatUpRequest.newBuilder()
+                .setStat(Thermo.newBuilder()
+                        .setStatus(true))
+                .build();
+
+        //Server Streaming
+        thermoClient.heatUpService(heatUpRequest)
+                .forEachRemaining(heatUpResponse -> {
+                    System.out.println(heatUpResponse.getLevel1());
+                    System.out.println(heatUpResponse.getLevel2());
+                    System.out.println(heatUpResponse.getLevel3());
+                    System.out.println(heatUpResponse.getResult());
+                });
+
+        channel.shutdown();
+
+    }
+    private void ThermoMonitorService(ManagedChannel channel){
+
+        ThermoServiceGrpc.ThermoServiceStub asyncClient = ThermoServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<ThermoMonitorRequest> requestObserver = asyncClient.thermoMonitorService(new StreamObserver<ThermoMonitorResponse>() {
+            @Override
+            public void onNext(ThermoMonitorResponse value) {
+
+                String result = "Sending Temperature" + value.getResult();
+                }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server has finished sending the data");
+                System.out.println("Your room is 23 degrees celsius, result: ");
+            }
+        });
+        Arrays.asList("Temp Reading 1", "Temp reading 2", "Temp Reading 3", "Temp Reading 4").forEach(
+                sensorRead -> {
+                    System.out.println("Sending: " + sensorRead);
+                    requestObserver.onNext(ThermoMonitorRequest.newBuilder()
+                            .setMon(Thermo.newBuilder()
+                            .setSensor(sensorRead)
+                            .build())
+                            .build());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+        requestObserver.onCompleted();
+        try {
+            latch.await(3L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main (String[]args) throws IOException {
         Client main = new Client();
+
         main.run();
 
         try {

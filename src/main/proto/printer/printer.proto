@@ -3,17 +3,14 @@ package printer;
 option java_package = "com.proto.printer";
 option java_multiple_files = true;
 
-
 message Printer {
     bool status = 1;
     string testpage = 2;
     string documents = 3;
-
 }
 //The Request and Responses - what we send and what we receive
 //from between the client and server
 /* --------------------------------------------------------- */
-
 message PrinterStatusRequest {
     Printer status = 1;
 }
@@ -21,7 +18,6 @@ message PrinterStatusResponse {
     string result = 1;
 }
 /* --------------------------------------------------------- */
-
 message CheckPrinterRequest {
     Printer status = 1;
 }
@@ -39,16 +35,13 @@ message LongPrintTestResponse{
     string result = 1;
 }
 /* --------------------------------------------------------- */
-
 message DocumentPrintRequest{
     Printer dts = 1;
 }
 message DocumentPrintResponse{
     string result = 1;
 }
-
 /* --------------------------------------------------------- */
-
 //define and name service - make readable
 service PrintService{
     //Unary

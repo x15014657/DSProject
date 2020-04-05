@@ -6,7 +6,7 @@ import java.util.EmptyStackException;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
-    @Override
+    @Override //Unary
     public void printerStatus(PrinterStatusRequest request, StreamObserver<PrinterStatusResponse> responseObserver) {
         Printer printStatus = request.getStatus();
         boolean status = printStatus.getStatus();
@@ -29,7 +29,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    @Override
+    @Override //ServerStreaming
     public void checkPrinter(CheckPrinterRequest request, StreamObserver<CheckPrinterResponse> responseObserver) {
         Printer checkPrinter = request.getStatus();
         boolean status = checkPrinter.getStatus();
@@ -63,7 +63,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         responseObserver.onNext(response);
     }
 
-    @Override
+    @Override //Client Streaming
     public StreamObserver<LongPrintTestRequest> longPrintTest(StreamObserver<LongPrintTestResponse> responseObserver) {
         return new StreamObserver<LongPrintTestRequest>() {
             String result = "";
@@ -76,7 +76,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
             @Override
             public void onError(Throwable t) {
-                //client sends an error
+                System.out.println("Error");
             }
 
             @Override
@@ -92,7 +92,7 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         };
     }
 
-    @Override
+    @Override //BiDi Streaming
     public StreamObserver<DocumentPrintRequest> documentPrint(StreamObserver<DocumentPrintResponse> responseObserver) {
         StreamObserver<DocumentPrintRequest> requestObserver = new StreamObserver<DocumentPrintRequest>() {
             @Override
