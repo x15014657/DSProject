@@ -7,6 +7,7 @@ import java.util.EmptyStackException;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
 
+    @Override
     public void printerStatus(PrinterStatusRequest request, StreamObserver<PrinterStatusResponse> responseObserver) {
         Printer printStatus = request.getStatus();
         boolean status = printStatus.getStatus();
@@ -97,8 +98,8 @@ public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {
         StreamObserver<DocumentPrintRequest> requestObserver = new StreamObserver<DocumentPrintRequest>() {
             @Override
             public void onNext(DocumentPrintRequest value) {
-                String result = "Printing Document Queu: " + value.getDts().getDocuments();
-                DocumentPrintResponse documentPrintResponse = new DocumentPrintResponse().newBuilder()
+                String result = "Printing Document Queue: " + value.getDts().getDocuments();
+                DocumentPrintResponse documentPrintResponse = DocumentPrintResponse.newBuilder()
                         .setResult(result)
                         .build();
 

@@ -13,7 +13,6 @@ import com.proto.vpn.VpnStatusResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
@@ -33,34 +32,36 @@ public class Client {
         System.out.println("Client Interface Initialising...");
         System.out.println("Building Channels...");
 
+
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 5000)
                 .usePlaintext()
                 .build();
+
         ManagedChannel channel1 = ManagedChannelBuilder.forAddress("localhost", 5001)
                 .usePlaintext()
                 .build();
+
         ManagedChannel channel2 = ManagedChannelBuilder.forAddress("localhost", 5002)
+                .usePlaintext()
+                .build();
+
+        ManagedChannel channel3 = ManagedChannelBuilder.forAddress("localhost", 5003)
                 .usePlaintext()
                 .build();
 
         // Comment & Un-Comment To Use Different Streams
 
-        //doUnaryCall(channel, channel1, channel2);
-        //doServerStreamingCall(channel);
-        //doClientStreamingCall(channel);
-        doBiDiStreamingCall(channel);
 
-       /* System.out.println("Shutting Down Channels");
-        channel.shutdown();
-        channel.shutdown();
-        channel2.shutdown();
-        channel3.shutdown();*/
-
+        // UnaryServices(channel, channel1, channel2, channel3);
+        //ServerStreamingServices(channel, channel1, channel2, channel3);
+        //ClientStreamingServices(channel, channel1, channel2, channel3);
+        //BiDiStreamingServices(channel, channel1, channel2, channel3);
     }
 
-    private void doUnaryCall(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2) {
 
-        /*------------------------Printer Status---------------------------------------------------------*/
+    private void UnaryServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+
+        /*------- Check Printer Status------*/
 
         PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
 
@@ -73,12 +74,10 @@ public class Client {
                 .build();
 
         PrinterStatusResponse printerStatusResponse = printClient.printerStatus(printerStatusRequest);
-
         System.out.println(printerStatusResponse.getResult());
+        channel.shutdown();
 
-
-
-        /*------------------------Vpn Status---------------------------------------------------------*/
+        /*-----------Vpn Status-----------*/
 
         VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel1);
 
@@ -94,9 +93,9 @@ public class Client {
 
         System.out.println(vpnStatusResponse.getResult());
 
+        channel1.shutdown();
 
-
-        /*------------------------ThermoStat Status---------------------------------------------------------*/
+        /*------------ThermoStat Status------------*/
 
         ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel2);
         Thermo thermoStatus = Thermo.newBuilder()
@@ -109,24 +108,22 @@ public class Client {
         ThermoResponse thermoResponse = thermoClient.thermoStatus(thermoRequest);
         System.out.println(thermoResponse.getResult());
 
-
     }
 
-    private void doServerStreamingCall(ManagedChannel channel) {
+    private void ServerStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
 
-        /*------------------------Check Printer ---------------------------------------------------------*/
+        /*------- Check Printer (Tests)------*/
 
-        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
+        PrintServiceGrpc.PrintServiceBlockingStub printClient1 = PrintServiceGrpc.newBlockingStub(channel1);
 
         //Server Streaming Side
-        CheckPrinterRequest checkPrinterStatusRequest =
-                CheckPrinterRequest.newBuilder()
-                        .setStatus(Printer.newBuilder()
-                                .setStatus(true))
-                        .build();
+        CheckPrinterRequest checkPrinterRequest = CheckPrinterRequest.newBuilder()
+                .setStatus(Printer.newBuilder()
+                        .setStatus(true))
+                .build();
 
         //Server Streaming
-        printClient.checkPrinter(checkPrinterStatusRequest)
+        printClient1.checkPrinter(checkPrinterRequest)
                 .forEachRemaining(checkPrinterResponse -> {
                     System.out.println(checkPrinterResponse.getNetwork());
                     System.out.println(checkPrinterResponse.getCartridge());
@@ -134,12 +131,14 @@ public class Client {
                     System.out.println(checkPrinterResponse.getResult());
                 });
 
+        channel.shutdown();
 
 
-        /*-----------------------------------------------------------------------------------------------*/
     }
 
-    private void doClientStreamingCall(ManagedChannel channel) {
+    private void ClientStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+
+        /*------- Print Test Page------*/
 
         PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
         CountDownLatch latch = new CountDownLatch(1);
@@ -195,14 +194,16 @@ public class Client {
         requestObserver.onCompleted();
         try {
             latch.await(3L, TimeUnit.SECONDS);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         channel.shutdown();
-
     }
 
-    private void doBiDiStreamingCall(ManagedChannel channel) {
+    private void BiDiStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+
+        /*------- Print Documents BiDi Streaming------*/
 
         PrintServiceGrpc.PrintServiceStub asyncClient = PrintServiceGrpc.newStub(channel);
         CountDownLatch latch = new CountDownLatch(1);
@@ -210,7 +211,7 @@ public class Client {
         StreamObserver<DocumentPrintRequest> requestObserver = asyncClient.documentPrint(new StreamObserver<DocumentPrintResponse>() {
             @Override
             public void onNext(DocumentPrintResponse value) {
-                System.out.println("" + value.getResult());
+                System.out.println("Printing Queue..." + value.getResult());
             }
 
             @Override
@@ -238,18 +239,16 @@ public class Client {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
-        );
+                });
         requestObserver.onCompleted();
         try {
             latch.await(3L, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        channel.shutdown();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main (String[]args) throws IOException {
         Client main = new Client();
         main.run();
 
@@ -262,12 +261,11 @@ public class Client {
 
         } catch (UnknownHostException e) {
             System.out.println(e.getMessage());
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
         }
     }
 
     private static class SampleListener implements ServiceListener {
+
         @Override
         public void serviceAdded(ServiceEvent event) {
             System.out.println("Service added: " + event.getInfo());
@@ -287,6 +285,3 @@ public class Client {
         }
     }
 }
-
-
-
