@@ -52,7 +52,7 @@ public class Client {
         // Comment & Un-Comment To Use Different Streams
 
 
-        // UnaryServices(channel, channel1, channel2, channel3);
+         UnaryServices(channel, channel1, channel2, channel3);
         //ServerStreamingServices(channel, channel1, channel2, channel3);
         //ClientStreamingServices(channel, channel1, channel2, channel3);
         //BiDiStreamingServices(channel, channel1, channel2, channel3);
