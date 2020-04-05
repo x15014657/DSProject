@@ -2,7 +2,6 @@ package com.conorjc.dsproject.impl;
 
 import com.proto.printer.*;
 import io.grpc.stub.StreamObserver;
-
 import java.util.EmptyStackException;
 
 public class PrinterServiceImpl extends PrintServiceGrpc.PrintServiceImplBase {

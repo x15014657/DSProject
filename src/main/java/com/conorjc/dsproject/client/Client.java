@@ -2,10 +2,7 @@ package com.conorjc.dsproject.client;
 
 import com.conorjc.dsproject.jmdns.GetRequest;
 import com.proto.printer.*;
-import com.proto.thermo.Thermo;
-import com.proto.thermo.ThermoRequest;
-import com.proto.thermo.ThermoResponse;
-import com.proto.thermo.ThermoServiceGrpc;
+import com.proto.thermo.*;
 import com.proto.vpn.Vpn;
 import com.proto.vpn.VpnServiceGrpc;
 import com.proto.vpn.VpnStatusRequest;
@@ -52,10 +49,11 @@ public class Client {
         // Comment & Un-Comment To Use Different Streams
 
 
-         UnaryServices(channel, channel1, channel2, channel3);
-        //ServerStreamingServices(channel, channel1, channel2, channel3);
+        // UnaryServices(channel, channel1, channel2, channel3);
+        //PrinterTestServerSide(channel);
+        HeatUpServiceServerSide(channel);
         //ClientStreamingServices(channel, channel1, channel2, channel3);
-        //BiDiStreamingServices(channel, channel1, channel2, channel3);
+        //PrintDocuments(channel);
     }
 
 
@@ -75,11 +73,11 @@ public class Client {
 
         PrinterStatusResponse printerStatusResponse = printClient.printerStatus(printerStatusRequest);
         System.out.println(printerStatusResponse.getResult());
-        channel.shutdown();
+
 
         /*-----------Vpn Status-----------*/
 
-        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel1);
+        VpnServiceGrpc.VpnServiceBlockingStub vpnClient = VpnServiceGrpc.newBlockingStub(channel);
 
         Vpn vpnStatus = Vpn.newBuilder()
                 .setStatus(false)
@@ -93,7 +91,7 @@ public class Client {
 
         System.out.println(vpnStatusResponse.getResult());
 
-        channel1.shutdown();
+        channel.shutdown();
 
         /*------------ThermoStat Status------------*/
 
@@ -110,11 +108,11 @@ public class Client {
 
     }
 
-    private void ServerStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+    private void PrinterTestServerSide(ManagedChannel channel) {
 
         /*------- Check Printer (Tests)------*/
 
-        PrintServiceGrpc.PrintServiceBlockingStub printClient1 = PrintServiceGrpc.newBlockingStub(channel1);
+        PrintServiceGrpc.PrintServiceBlockingStub printClient = PrintServiceGrpc.newBlockingStub(channel);
 
         //Server Streaming Side
         CheckPrinterRequest checkPrinterRequest = CheckPrinterRequest.newBuilder()
@@ -123,7 +121,7 @@ public class Client {
                 .build();
 
         //Server Streaming
-        printClient1.checkPrinter(checkPrinterRequest)
+        printClient.checkPrinter(checkPrinterRequest)
                 .forEachRemaining(checkPrinterResponse -> {
                     System.out.println(checkPrinterResponse.getNetwork());
                     System.out.println(checkPrinterResponse.getCartridge());
@@ -133,6 +131,29 @@ public class Client {
 
         channel.shutdown();
 
+    }
+
+    private void HeatUpServiceServerSide(ManagedChannel channel){
+        /*-------Heat Up Service------*/
+
+        ThermoServiceGrpc.ThermoServiceBlockingStub thermoClient = ThermoServiceGrpc.newBlockingStub(channel);
+
+        //Server Streaming Side
+        HeatUpRequest heatUpRequest = HeatUpRequest.newBuilder()
+                .setStatus(Thermo.newBuilder()
+                        .setStatus(true))
+                .build();
+
+        //Server Streaming
+        thermoClient.heatUpService(heatUpRequest)
+                .forEachRemaining(heatUpResponse -> {
+                    System.out.println(heatUpResponse.getLevel1());
+                    System.out.println(heatUpResponse.getLevel2());
+                    System.out.println(heatUpResponse.getLevel3());
+                    System.out.println(heatUpResponse.getResult());
+                });
+
+        channel.shutdown();
 
     }
 
@@ -201,7 +222,7 @@ public class Client {
         channel.shutdown();
     }
 
-    private void BiDiStreamingServices(ManagedChannel channel, ManagedChannel channel1, ManagedChannel channel2, ManagedChannel channel3) {
+    private void PrintDocuments(ManagedChannel channel) {
 
         /*------- Print Documents BiDi Streaming------*/
 

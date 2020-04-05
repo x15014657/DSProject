@@ -15,7 +15,7 @@ import java.net.Socket;
 
 public class Server {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println("Servers Initialising...");
         System.out.println("Adding services...");
 
@@ -53,8 +53,11 @@ public class Server {
             e.printStackTrace();
         }
 
-
         System.out.println("Server Initialised");
+
+        server.awaitTermination();
+        server1.awaitTermination();
+        server2.awaitTermination();
 
         int port = 5000;
         JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());

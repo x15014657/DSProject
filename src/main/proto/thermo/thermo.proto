@@ -7,7 +7,9 @@ option java_multiple_files = true;
 
 message Thermo {
   bool status = 1;
+  string warm = 2;
 }
+
 message ThermoRequest {
   Thermo status = 1;
 }
@@ -15,8 +17,23 @@ message ThermoResponse {
   string result = 1;
 }
 
+message HeatUpRequest{
+  Thermo status = 1;
+}
+
+message HeatUpResponse{
+  string level1 = 1;
+  string level2 = 2;
+  string level3 = 3;
+  string result = 4;
+}
+
+
+
 //define and name service - make readable
 service ThermoService{
   //Unary
   rpc ThermoStatus(ThermoRequest) returns (ThermoResponse) {};
+  //Server Streaming
+  rpc HeatUpService(HeatUpRequest) returns (stream HeatUpResponse) {};
 }
